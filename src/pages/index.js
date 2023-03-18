@@ -53,20 +53,42 @@ import { useEffect, useState } from 'react';
 //   },
 // ];
 
-const TodoItem = ({ todo }) => {
+const TodoItem = ({ todo, removeTodo, toggleTodo }) => {
   return (
-    <label
-      key={todo.id}
-      className="flex items-center justify-between h-1/6 bg-slate-200 border-b border-slate-300"
-    >
-      <div className="flex items-center justify-start">
-        <input
-          type="checkbox"
-          className="h-5 w-5 text-slate-600 border border-slate-300 rounded-md focus:ring-slate-500"
-        />
-        <span className="ml-2 text-slate-600">{todo.title}</span>
-      </div>
-    </label>
+    <div className="flex items-center justify-between h-1/6 bg-slate-200 border-b border-slate-300">
+      <label key={todo.id}>
+        <div className="flex items-center justify-start">
+          <input
+            type="checkbox"
+            className="h-5 w-5 text-slate-600 border border-slate-300 rounded-md focus:ring-slate-500"
+            checked={todo.completed}
+            onChange={() => toggleTodo(todo.id)}
+          />
+          <span className="ml-2 text-slate-600">{todo.title}</span>
+        </div>
+      </label>
+
+      {/* Remove todo button */}
+      <button
+        className="h-1/6 bg-slate-200 border-b border-slate-300"
+        onClick={() => removeTodo(todo.id)}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-slate-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
   );
 };
 
@@ -83,7 +105,19 @@ export default function Home() {
       completed: false,
     };
 
-    setTodos((prevTodos) => [...prevTodos, newTodo]);
+    setTodos((prevTodos) => [newTodo, ...prevTodos]);
+  };
+
+  const removeTodo = (id) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  };
+
+  const toggleTodo = (id) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) => {
+        return todo.id === id ? { ...todo, completed: !todo.completed } : todo;
+      }),
+    );
   };
 
   return (
@@ -131,7 +165,12 @@ export default function Home() {
         {todos
           .filter((todo) => !todo.completed)
           .map((todo) => (
-            <TodoItem key={todo.id} todo={todo} />
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              removeTodo={removeTodo}
+              toggleTodo={toggleTodo}
+            />
           ))}
 
         {/* divider */}
@@ -143,7 +182,12 @@ export default function Home() {
         {todos
           .filter((todo) => todo.completed)
           .map((todo) => (
-            <TodoItem key={todo.id} todo={todo} />
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              removeTodo={removeTodo}
+              toggleTodo={toggleTodo}
+            />
           ))}
       </div>
 
