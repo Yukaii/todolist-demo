@@ -53,7 +53,20 @@ import { useEffect, useState } from 'react';
 //   },
 // ];
 
-const TodoItem = ({ todo, removeTodo, toggleTodo }) => {
+const TodoItem = ({ todo, removeTodo, toggleTodo, updateTodo }) => {
+  const [editing, setEditing] = useState(false);
+  const [newTitle, setNewTitle] = useState(todo.title);
+  // handle composition event
+  const [isComposing, setIsComposing] = useState(false);
+
+  const handleComposition = (e) => {
+    if (e.type === 'compositionend') {
+      setIsComposing(false);
+    } else {
+      setIsComposing(true);
+    }
+  };
+
   return (
     <div className="flex items-center justify-between h-1/6 bg-slate-200 border-b border-slate-300">
       <label key={todo.id}>
@@ -64,9 +77,53 @@ const TodoItem = ({ todo, removeTodo, toggleTodo }) => {
             checked={todo.completed}
             onChange={() => toggleTodo(todo.id)}
           />
-          <span className="ml-2 text-slate-600">{todo.title}</span>
+
+          {editing ? (
+            <input
+              type="text"
+              className="h-1/6 w-1/2 bg-slate-200 border-b border-slate-300"
+              value={newTitle}
+              onChange={(e) => {
+                handleComposition(e);
+                setNewTitle(e.target.value);
+              }}
+              onBlur={() => {
+                updateTodo(todo.id, newTitle);
+                setEditing(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isComposing) {
+                  updateTodo(todo.id, newTitle);
+                  setEditing(false);
+                }
+              }}
+            />
+          ) : (
+            <span className="ml-2 text-slate-600">{todo.title}</span>
+          )}
         </div>
       </label>
+
+      {/* Edit button */}
+      <button
+        className="h-1/6 bg-slate-200 border-b border-slate-300"
+        onClick={() => setEditing(true)}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={24}
+          height={24}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx={12} cy={12} r={1} />
+          <circle cx={19} cy={12} r={1} />
+          <circle cx={5} cy={12} r={1} />
+        </svg>
+      </button>
 
       {/* Remove todo button */}
       <button
@@ -116,6 +173,14 @@ export default function Home() {
     setTodos((prevTodos) =>
       prevTodos.map((todo) => {
         return todo.id === id ? { ...todo, completed: !todo.completed } : todo;
+      }),
+    );
+  };
+
+  const updateTodo = (id, newTitle) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) => {
+        return todo.id === id ? { ...todo, title: newTitle } : todo;
       }),
     );
   };
@@ -170,6 +235,7 @@ export default function Home() {
               todo={todo}
               removeTodo={removeTodo}
               toggleTodo={toggleTodo}
+              updateTodo={updateTodo}
             />
           ))}
 
@@ -187,6 +253,7 @@ export default function Home() {
               todo={todo}
               removeTodo={removeTodo}
               toggleTodo={toggleTodo}
+              updateTodo={updateTodo}
             />
           ))}
       </div>
